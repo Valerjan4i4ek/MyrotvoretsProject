@@ -33,11 +33,29 @@ public class ParsingClass {
             for(NewsData newsData : newsList){
                 if(newsData.getNumberOfNews() == newsNumber){
                     if(getNewsDataCache(newsData.getArticle()) != null){
-                        parsingText(Objects.requireNonNull(getNewsDataCache(newsData.getArticle())).getLink());
+                        if(getTextArticleCache(newsData.getArticle()) != null){
+                            System.out.println(parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink()));
+                            parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink());
+                        }
+                        else{
+                            String s = parsingText(newsData.getLink());
+                            System.out.println(s);
+                            addTextArticleCache(newsData.getArticle(), newsData.getLink(), s);
+                            parsingText(Objects.requireNonNull(getNewsDataCache(newsData.getArticle())).getLink());
+                        }
                     }
                     else{
                         addNewsDataCache(newsData.getAuthor(), newsData.getArticle(), newsData.getLink());
-                        parsingText(newsData.getLink());
+                        if(getTextArticleCache(newsData.getArticle()) != null){
+                            System.out.println(parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink()));
+                            parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink());
+                        }
+                        else{
+                            String s = parsingText(newsData.getLink());
+                            System.out.println(s);
+                            addTextArticleCache(newsData.getArticle(), newsData.getLink(), s);
+                            parsingText(newsData.getLink());
+                        }
                     }
                     //method news parsing
                 }
@@ -80,16 +98,20 @@ public class ParsingClass {
         return null;
     }
 
-    public static void parsingText(String link) throws IOException {
+    public static String parsingText(String link) throws IOException {
         Document doc = Jsoup.connect(link)
                 .userAgent("Chrome/104.0.0.0")
                 .referrer("http://www.google.com")
                 .get();
 
+        StringBuilder s = new StringBuilder();
+
         Elements elements = doc.select("article");
         for(Element element : elements.select("p")){
-            System.out.println(element.text());
+//            System.out.println(element.text());
+            s.append(element.text() + "\n");
         }
+        return s.toString();
     }
 
     public static List<NewsData> parsingNews(String link) throws IOException {
