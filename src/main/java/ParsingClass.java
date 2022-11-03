@@ -36,12 +36,14 @@ public class ParsingClass {
                         if(getTextArticleCache(newsData.getArticle()) != null){
                             System.out.println(parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink()));
                             parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink());
+                            start(parsingNews("https://myrotvorets.news/"), parsingPages("https://myrotvorets.news/"));
                         }
                         else{
                             String s = parsingText(newsData.getLink());
                             System.out.println(s);
                             addTextArticleCache(newsData.getArticle(), newsData.getLink(), s);
                             parsingText(Objects.requireNonNull(getNewsDataCache(newsData.getArticle())).getLink());
+                            start(parsingNews("https://myrotvorets.news/"), parsingPages("https://myrotvorets.news/"));
                         }
                     }
                     else{
@@ -49,12 +51,14 @@ public class ParsingClass {
                         if(getTextArticleCache(newsData.getArticle()) != null){
                             System.out.println(parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink()));
                             parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink());
+                            start(parsingNews("https://myrotvorets.news/"), parsingPages("https://myrotvorets.news/"));
                         }
                         else{
                             String s = parsingText(newsData.getLink());
                             System.out.println(s);
                             addTextArticleCache(newsData.getArticle(), newsData.getLink(), s);
                             parsingText(newsData.getLink());
+                            start(parsingNews("https://myrotvorets.news/"), parsingPages("https://myrotvorets.news/"));
                         }
                     }
                     //method news parsing
