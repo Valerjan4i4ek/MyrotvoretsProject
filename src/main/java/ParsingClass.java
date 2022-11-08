@@ -6,22 +6,23 @@ import org.jsoup.select.Elements;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ParsingClass {
     static NewsDataCache newsDataCache = new NewsDataCache();
     static TextArticleCache textArticleCache = new TextArticleCache();
+    static final String myrotvoretsLink = "https://myrotvorets.news/";
 
     public static void main(String[] args) throws IOException {
-        List<NewsData> newsDataList = parsingNews("https://myrotvorets.news/");
-        List<PagesData> pagesDataList = parsingPages("https://myrotvorets.news/");
-        start(newsDataList, pagesDataList);
+//        List<NewsData> newsDataList = parsingNews(myrotvoretsLink);
+        Map<Integer, NewsData> newsDataMap = parsingNews(myrotvoretsLink);
+        List<PagesData> pagesDataList = parsingPages(myrotvoretsLink);
+        start(newsDataMap, pagesDataList);
+//        start(newsDataList, pagesDataList);
     }
 
-    public static void start(List<NewsData> newsList, List<PagesData> pagesList) throws IOException {
+    public static void start(Map<Integer, NewsData> newsDataMap, List<PagesData> pagesList) throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("News or Pages : 1 or 2");
         int newsOrPages = scanner.nextInt();
@@ -30,40 +31,72 @@ public class ParsingClass {
         if(newsOrPages == 1){
             System.out.println("Choose number of news");
             newsNumber = scanner.nextInt();
-            for(NewsData newsData : newsList){
-                if(newsData.getNumberOfNews() == newsNumber){
-                    if(getNewsDataCache(newsData.getArticle()) != null){
-                        if(getTextArticleCache(newsData.getArticle()) != null){
-                            System.out.println(parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink()));
-                            parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink());
-                            start(parsingNews("https://myrotvorets.news/"), parsingPages("https://myrotvorets.news/"));
-                        }
-                        else{
-                            String s = parsingText(newsData.getLink());
-                            System.out.println(s);
-                            addTextArticleCache(newsData.getArticle(), newsData.getLink(), s);
-                            parsingText(Objects.requireNonNull(getNewsDataCache(newsData.getArticle())).getLink());
-                            start(parsingNews("https://myrotvorets.news/"), parsingPages("https://myrotvorets.news/"));
-                        }
+            if(newsDataMap.containsKey(newsNumber)){
+                NewsData newsData = newsDataMap.get(newsNumber);
+                if(getNewsDataCache(newsData.getLink()) != null){
+                    if(getTextArticleCache(newsData.getLink()) != null){
+                        System.out.println(parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getLink())).getLink()));
+                        parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getLink())).getLink());
+                        start(parsingNews(myrotvoretsLink), parsingPages(myrotvoretsLink));
                     }
                     else{
-                        addNewsDataCache(newsData.getAuthor(), newsData.getArticle(), newsData.getLink());
-                        if(getTextArticleCache(newsData.getArticle()) != null){
-                            System.out.println(parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink()));
-                            parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getArticle())).getLink());
-                            start(parsingNews("https://myrotvorets.news/"), parsingPages("https://myrotvorets.news/"));
-                        }
-                        else{
-                            String s = parsingText(newsData.getLink());
-                            System.out.println(s);
-                            addTextArticleCache(newsData.getArticle(), newsData.getLink(), s);
-                            parsingText(newsData.getLink());
-                            start(parsingNews("https://myrotvorets.news/"), parsingPages("https://myrotvorets.news/"));
-                        }
+                        String s = parsingText(newsData.getLink());
+                        System.out.println(s);
+                        addTextArticleCache(newsData.getArticle(), newsData.getLink(), s);
+                        parsingText(Objects.requireNonNull(getNewsDataCache(newsData.getLink())).getLink());
+                        start(parsingNews(myrotvoretsLink), parsingPages(myrotvoretsLink));
                     }
-                    //method news parsing
+                }
+                else{
+                    addNewsDataCache(newsData.getAuthor(), newsData.getArticle(), newsData.getLink());
+                    if(getTextArticleCache(newsData.getLink()) != null){
+                        System.out.println(parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getLink())).getLink()));
+                        parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getLink())).getLink());
+                        start(parsingNews(myrotvoretsLink), parsingPages(myrotvoretsLink));
+                    }
+                    else{
+                        String s = parsingText(newsData.getLink());
+                        System.out.println(s);
+                        addTextArticleCache(newsData.getArticle(), newsData.getLink(), s);
+                        parsingText(newsData.getLink());
+                        start(parsingNews(myrotvoretsLink), parsingPages(myrotvoretsLink));
+                    }
                 }
             }
+//            for(NewsData newsData : newsList){
+//                if(newsData.getNumberOfNews() == newsNumber){
+//                    if(getNewsDataCache(newsData.getLink()) != null){
+//                        if(getTextArticleCache(newsData.getLink()) != null){
+//                            System.out.println(parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getLink())).getLink()));
+//                            parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getLink())).getLink());
+//                            start(parsingNews(myrotvoretsLink), parsingPages(myrotvoretsLink));
+//                        }
+//                        else{
+//                            String s = parsingText(newsData.getLink());
+//                            System.out.println(s);
+//                            addTextArticleCache(newsData.getArticle(), newsData.getLink(), s);
+//                            parsingText(Objects.requireNonNull(getNewsDataCache(newsData.getLink())).getLink());
+//                            start(parsingNews(myrotvoretsLink), parsingPages(myrotvoretsLink));
+//                        }
+//                    }
+//                    else{
+//                        addNewsDataCache(newsData.getAuthor(), newsData.getArticle(), newsData.getLink());
+//                        if(getTextArticleCache(newsData.getLink()) != null){
+//                            System.out.println(parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getLink())).getLink()));
+//                            parsingText(Objects.requireNonNull(getTextArticleCache(newsData.getLink())).getLink());
+//                            start(parsingNews(myrotvoretsLink), parsingPages(myrotvoretsLink));
+//                        }
+//                        else{
+//                            String s = parsingText(newsData.getLink());
+//                            System.out.println(s);
+//                            addTextArticleCache(newsData.getArticle(), newsData.getLink(), s);
+//                            parsingText(newsData.getLink());
+//                            start(parsingNews(myrotvoretsLink), parsingPages(myrotvoretsLink));
+//                        }
+//                    }
+//                    //method news parsing
+//                }
+//            }
         }
         else if(newsOrPages == 2){
             System.out.println("Choose number of page");
@@ -84,9 +117,9 @@ public class ParsingClass {
         textArticleCache.addTextArticleCache(article, link, articleText);
     }
 
-    public static TextArticle getTextArticleCache(String article){
-        if(textArticleCache.getTextArticleCache(article) != null){
-            return textArticleCache.getTextArticleCache(article);
+    public static TextArticle getTextArticleCache(String link){
+        if(textArticleCache.getTextArticleCache(link) != null){
+            return textArticleCache.getTextArticleCache(link);
         }
         return null;
     }
@@ -95,9 +128,9 @@ public class ParsingClass {
         newsDataCache.addNewsDataCache(author, article, link);
     }
 
-    public static NewsData getNewsDataCache(String article){
-        if(newsDataCache.getNewsDataCache(article) != null){
-            return newsDataCache.getNewsDataCache(article);
+    public static NewsData getNewsDataCache(String link){
+        if(newsDataCache.getNewsDataCache(link) != null){
+            return newsDataCache.getNewsDataCache(link);
         }
         return null;
     }
@@ -118,8 +151,8 @@ public class ParsingClass {
         return s.toString();
     }
 
-    public static List<NewsData> parsingNews(String link) throws IOException {
-        List<NewsData> list = new ArrayList<>();
+    public static Map<Integer, NewsData> parsingNews(String link) throws IOException{
+        Map<Integer, NewsData> map = new ConcurrentHashMap<>();
         Document doc = Jsoup.connect(link)
                 .userAgent("Chrome/104.0.0.0")
                 .referrer("http://www.google.com")
@@ -132,12 +165,33 @@ public class ParsingClass {
             System.out.println(element.select("a").get(2).text());
             System.out.println(element.select("a").get(2).attr("href"));
             NewsData newsData = new NewsData(i, element.select("a").get(0).text(), element.select("a").get(2).text(), element.select("a").get(2).attr("href"));
-            list.add(newsData);
+            map.put(i, newsData);
             System.out.println();
             i++;
         }
-        return list;
+        return map;
     }
+
+//    public static List<NewsData> parsingNews(String link) throws IOException {
+//        List<NewsData> list = new ArrayList<>();
+//        Document doc = Jsoup.connect(link)
+//                .userAgent("Chrome/104.0.0.0")
+//                .referrer("http://www.google.com")
+//                .get();
+//
+//        Elements listNews = doc.select("article");
+//        int i = 1;
+//        for(Element element : listNews){
+//            System.out.println(i + " " + element.select("a").get(0).text());
+//            System.out.println(element.select("a").get(2).text());
+//            System.out.println(element.select("a").get(2).attr("href"));
+//            NewsData newsData = new NewsData(i, element.select("a").get(0).text(), element.select("a").get(2).text(), element.select("a").get(2).attr("href"));
+//            list.add(newsData);
+//            System.out.println();
+//            i++;
+//        }
+//        return list;
+//    }
 
     public static List<PagesData> parsingPages(String link) throws IOException {
         List<PagesData> list = new ArrayList<>();
